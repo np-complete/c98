@@ -98,9 +98,14 @@ task epub: BOOK_EPUB
 
 IMAGES = FileList['images/**/*']
 OTHERS = ENV['REVIEW_DEPS'] || []
-SRC = FileList['./**/*.re', '*.rb'] + [CONFIG_FILE, CATALOG_FILE] + IMAGES + FileList[OTHERS]
+SRC_MD = FileList['./**/*.md']
+SRC = SRC_MD.ext('.re') + [CONFIG_FILE, CATALOG_FILE] + IMAGES + FileList[OTHERS]
 SRC_EPUB = FileList['*.css']
 SRC_PDF = FileList['layouts/*.erb', 'sty/**/*.sty']
+
+rule '.re' => '.md' do |t|
+  sh "md2review --render-link-in-footnote #{t.source} > #{t.name}"
+end
 
 file BOOK_PDF => SRC + SRC_PDF do
   FileUtils.rm_rf([BOOK_PDF, BOOK, BOOK + '-pdf'])
